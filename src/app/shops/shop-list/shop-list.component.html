@@ -1,0 +1,115 @@
+<div class="shops-container">
+  <!-- HEADER -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Shop Directory</h1>
+      <p class="page-subtitle">Manage and overview all registered solar retail locations</p>
+    </div>
+    <div class="header-actions">
+      <div class="stat-pill">
+        <span class="stat-dot"></span>
+        {{ shops.length }} Total Shops
+      </div>
+    </div>
+  </div>
+
+  <!-- SEARCH TOOLBAR -->
+  <div class="toolbar glass-card animate-fade-in">
+    <div class="search-wrapper">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input
+        type="text"
+        placeholder="Search by shop name, city or owner..."
+        [value]="searchQuery"
+        (input)="searchQuery = $any($event.target).value; onSearch()"
+        class="search-input"
+      />
+    </div>
+    <button class="btn-refresh" (click)="loadShops()" [disabled]="loading">
+      <svg class="btn-icon" [class.spinning]="loading" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="23 4 23 10 17 10"/>
+        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+      </svg>
+      Refresh
+    </button>
+  </div>
+
+  <!-- ERROR -->
+  <div *ngIf="errorMessage" class="feedback-banner error animate-fade-in">
+    <span>⚠️</span> {{ errorMessage }}
+  </div>
+
+  <!-- SKELETON -->
+  <div *ngIf="loading" class="cards-grid">
+    <div class="shop-card skeleton-card" *ngFor="let i of [1,2,3]">
+      <div class="sk sk-avatar"></div>
+      <div class="sk-body">
+        <div class="sk sk-title"></div>
+        <div class="sk sk-line"></div>
+        <div class="sk sk-line short"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EMPTY STATE -->
+  <div *ngIf="!loading && filtered.length === 0" class="empty-state animate-fade-in">
+    <div class="empty-icon">🏪</div>
+    <h3>No Shops Found</h3>
+    <p *ngIf="searchQuery">No shops match "{{ searchQuery }}". Try a different search term.</p>
+    <p *ngIf="!searchQuery">No shops have been registered yet.</p>
+  </div>
+
+  <!-- SHOP CARDS GRID -->
+  <div *ngIf="!loading && filtered.length > 0" class="cards-grid animate-fade-in">
+    <div class="shop-card" *ngFor="let shop of filtered">
+      <!-- Avatar -->
+      <div class="shop-avatar" [style.background]="'linear-gradient(135deg, ' + getCityColor(shop.city) + '22, ' + getCityColor(shop.city) + '44)'">
+        <span class="avatar-initials" [style.color]="getCityColor(shop.city)">{{ getInitials(shop.name) }}</span>
+      </div>
+
+      <!-- Info -->
+      <div class="shop-info">
+        <div class="shop-name-row">
+          <h3 class="shop-name">{{ shop.name }}</h3>
+          <span class="status-badge" [class.active]="shop.isActive" [class.inactive]="!shop.isActive">
+            {{ shop.isActive ? 'Active' : 'Inactive' }}
+          </span>
+        </div>
+        <p class="shop-owner">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="meta-icon">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          {{ shop.ownerName }}
+        </p>
+        <p class="shop-city">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="meta-icon">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+          <span class="city-tag" [style.color]="getCityColor(shop.city)">{{ shop.city }}</span>
+          &nbsp;·&nbsp; {{ shop.address }}
+        </p>
+      </div>
+
+      <!-- Contact row -->
+      <div class="shop-contact">
+        <a class="contact-chip" [href]="'tel:' + shop.contactNumber">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="chip-icon">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.38 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.75a16 16 0 0 0 6.06 6.06l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+          </svg>
+          {{ shop.contactNumber }}
+        </a>
+        <a class="contact-chip" [href]="'mailto:' + shop.email">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="chip-icon">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+          {{ shop.email }}
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

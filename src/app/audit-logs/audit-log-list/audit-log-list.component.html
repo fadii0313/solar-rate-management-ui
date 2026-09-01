@@ -1,0 +1,106 @@
+<div class="audit-logs-container">
+  <!-- HEADER -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">System Audit Logs</h1>
+      <p class="page-subtitle">Track configurations, logins, and daily rate entry transactions across all shops</p>
+    </div>
+  </div>
+
+  <!-- MAIN WORKSPACE -->
+  <div class="workspace-card glass-card animate-fade-in">
+    <!-- Toolbar -->
+    <div class="workspace-toolbar">
+      <div class="toolbar-left">
+        <h2 class="section-title">Audit Trail History</h2>
+      </div>
+      <div class="toolbar-right">
+        <button class="btn-refresh" (click)="loadLogs()" [disabled]="loading">
+          <svg class="btn-icon" [class.spinning]="loading" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 4 23 10 17 10"/>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+          </svg>
+          Refresh Feed
+        </button>
+      </div>
+    </div>
+
+    <!-- Error Banner -->
+    <div *ngIf="errorMessage" class="feedback-banner error animate-fade-in">
+      <span class="icon">⚠️</span>
+      <span class="msg">{{ errorMessage }}</span>
+    </div>
+
+    <!-- SKELETON LOADER -->
+    <div *ngIf="loading" class="skeleton-container">
+      <div class="skeleton-row" *ngFor="let i of [1,2,3,4,5]">
+        <div class="skeleton-cell w-20"></div>
+        <div class="skeleton-cell w-15"></div>
+        <div class="skeleton-cell w-15"></div>
+        <div class="skeleton-cell w-40"></div>
+        <div class="skeleton-cell w-10"></div>
+      </div>
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div *ngIf="!loading && logs.length === 0" class="empty-logs-container">
+      <div class="empty-icon">📜</div>
+      <h3>No Audit Logs Found</h3>
+      <p>System activities are currently empty. Perform some actions like logging in or saving daily rates to populate this log feed.</p>
+    </div>
+
+    <!-- AUDIT TRAIL TABLE -->
+    <div *ngIf="!loading && logs.length > 0" class="table-responsive">
+      <table class="logs-table">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Operator</th>
+            <th>Module & Action</th>
+            <th>Details & Modifications</th>
+            <th>IP Address</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let log of logs">
+            <!-- Timestamp -->
+            <td>
+              <div class="time-cell">
+                <span class="date-val">{{ log.timestamp | date:'yyyy-MM-dd' }}</span>
+                <span class="time-val">{{ log.timestamp | date:'HH:mm:ss' }}</span>
+              </div>
+            </td>
+            
+            <!-- User -->
+            <td>
+              <div class="operator-cell">
+                <span class="operator-name">{{ log.userFullName }}</span>
+                <span class="operator-username">&#64;{{ log.username }}</span>
+              </div>
+            </td>
+            
+            <!-- Module / Action -->
+            <td>
+              <div class="action-cell">
+                <span class="module-badge">{{ log.module }}</span>
+                <span class="action-name">{{ log.action }}</span>
+              </div>
+            </td>
+            
+            <!-- Details -->
+            <td>
+              <div class="details-cell">
+                <p class="details-text">{{ log.newValue }}</p>
+              </div>
+            </td>
+            
+            <!-- IP -->
+            <td>
+              <span class="ip-badge">{{ log.ipAddress || '—' }}</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

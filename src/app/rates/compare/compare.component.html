@@ -1,0 +1,81 @@
+<div class="compare-container">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Rate Comparison</h1>
+      <p class="page-subtitle">Side-by-side price comparison across all your shops</p>
+    </div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar glass-card animate-fade-in">
+    <div class="filter-group">
+      <label>Compare Date</label>
+      <input type="date" [value]="selectedDate" (change)="selectedDate=$any($event.target).value; load()" class="date-input" />
+    </div>
+    <button class="btn-compare" (click)="load()" [disabled]="loading">
+      <svg class="btn-icon" [class.spinning]="loading" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+      </svg>
+      {{ loading ? 'Loading...' : 'Refresh' }}
+    </button>
+    <div class="legend">
+      <span class="legend-dot lowest"></span><span class="legend-label">Lowest Price</span>
+      <span class="legend-dot higher"></span><span class="legend-label">Higher</span>
+      <span class="legend-dot missing"></span><span class="legend-label">Not Entered</span>
+    </div>
+  </div>
+
+  <div *ngIf="errorMessage" class="feedback-banner error">⚠️ {{ errorMessage }}</div>
+
+  <!-- SKELETON -->
+  <div *ngIf="loading" class="glass-card sk-container">
+    <div class="sk-row" *ngFor="let i of [1,2,3,4]">
+      <div class="sk w-25"></div><div class="sk w-20"></div>
+      <div class="sk w-20"></div><div class="sk w-20"></div>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div *ngIf="!loading && data" class="glass-card table-card animate-fade-in">
+    <div class="table-scroll">
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th class="item-col">Item</th>
+            <th class="item-col">Category</th>
+            <th *ngFor="let shop of data.shops" class="shop-col">{{ shop.name }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of data.items">
+            <td>
+              <div class="item-cell">
+                <span class="item-name">{{ item.itemName }}</span>
+                <code class="item-code">{{ item.itemCode }}</code>
+              </div>
+            </td>
+            <td><span class="cat-badge">{{ item.categoryName }}</span></td>
+            <td *ngFor="let sr of item.shopRates"
+                [class.cell-lowest]="isLowest(sr.rate, item)"
+                [class.cell-missing]="sr.rate === null">
+              <ng-container *ngIf="sr.rate !== null">
+                <div class="rate-cell">
+                  <span class="rate-value">Rs. {{ sr.rate | number:'1.2-2' }}</span>
+                  <span class="rate-diff" [class.lowest-tag]="isLowest(sr.rate, item)">
+                    {{ diffPct(sr.rate, item) }}
+                  </span>
+                </div>
+              </ng-container>
+              <span *ngIf="sr.rate === null" class="missing-rate">—</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && !data?.items?.length" class="empty-state">
+    <div>📊</div><h3>No Data Available</h3>
+    <p>No rates have been entered for the selected date.</p>
+  </div>
+</div>

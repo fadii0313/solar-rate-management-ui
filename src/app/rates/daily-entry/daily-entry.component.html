@@ -1,0 +1,232 @@
+<div class="daily-entry-container">
+  <!-- HEADER -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Daily Price Entry</h1>
+      <p class="page-subtitle" *ngIf="activeShopId">
+        Manage retail prices for <span class="shop-name-highlight">{{ activeShopName }}</span> on {{ selectedDate | date:'fullDate' }}
+      </p>
+      <p class="page-subtitle" *ngIf="!activeShopId">
+        Manage and update daily product rates
+      </p>
+    </div>
+  </div>
+
+  <!-- CONTEXT NOT SELECTED BANNER -->
+  <div *ngIf="!activeShopId" class="warning-container animate-fade-in">
+    <div class="warning-card">
+      <div class="warning-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+      </div>
+      <h2>Select Shop Context</h2>
+      <p>A shop context is required to load and save daily rate entries. Please select an authorized shop from the "Shop Context" dropdown in the top header to proceed.</p>
+    </div>
+  </div>
+
+  <!-- MAIN WORKSPACE -->
+  <div *ngIf="activeShopId" class="workspace-card glass-card animate-fade-in">
+    <!-- Toolbar -->
+    <div class="workspace-toolbar">
+      <div class="toolbar-left">
+        <div class="date-picker-group">
+          <label for="entry-date">Rate Date:</label>
+          <div class="input-date-wrapper">
+            <input 
+              type="date" 
+              id="entry-date" 
+              [(ngModel)]="selectedDate" 
+              (change)="onDateChange()" 
+              [disabled]="loading || saving"
+            />
+          </div>
+        </div>
+      </div>
+      
+      <div class="toolbar-right">
+        <button 
+          class="btn-copy" 
+          (click)="openCopyModal()" 
+          [disabled]="loading || saving"
+          title="Copy rates from a previous date into today's entry grid"
+        >
+          📋 Copy Previous Rates
+        </button>
+
+        <button 
+          class="btn-save" 
+          (click)="saveRates()" 
+          [disabled]="loading || saving || rates.length === 0"
+        >
+          <span *ngIf="!saving">
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+              <polyline points="17 21 17 13 7 13 7 21"/>
+              <polyline points="7 3 7 8 15 8"/>
+            </svg>
+            Save Daily Rates
+          </span>
+          <span *ngIf="saving" class="btn-spinner-wrapper">
+            <span class="spinner-small"></span>
+            Saving...
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Feedback Banners -->
+    <div *ngIf="successMessage" class="feedback-banner success animate-fade-in">
+      <span class="icon">✓</span>
+      <span class="msg">{{ successMessage }}</span>
+    </div>
+    <div *ngIf="errorMessage" class="feedback-banner error animate-fade-in">
+      <span class="icon">⚠️</span>
+      <span class="msg">{{ errorMessage }}</span>
+    </div>
+
+    <!-- SKELETON LOADER -->
+    <div *ngIf="loading" class="skeleton-container">
+      <div class="skeleton-row" *ngFor="let i of [1,2,3,4]">
+        <div class="skeleton-cell w-15"></div>
+        <div class="skeleton-cell w-30"></div>
+        <div class="skeleton-cell w-15"></div>
+        <div class="skeleton-cell w-15"></div>
+        <div class="skeleton-cell w-25"></div>
+      </div>
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div *ngIf="!loading && rates.length === 0" class="empty-rates-container">
+      <div class="empty-icon">📂</div>
+      <h3>No Items Found</h3>
+      <p>No active solar products are defined for this shop context. Please add items in the Solar Items catalog page first.</p>
+    </div>
+
+    <!-- RATES GRID -->
+    <div *ngIf="!loading && rates.length > 0" class="table-responsive">
+      <table class="rates-table">
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Item Details</th>
+            <th>Specifications</th>
+            <th>Yesterday Rate</th>
+            <th>Today's Rate</th>
+            <th>Price Delta</th>
+            <th>Remarks</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of rates" [class.locked]="item.isLocked">
+            <!-- Category -->
+            <td>
+              <span class="category-badge">{{ item.categoryName }}</span>
+            </td>
+            
+            <!-- Code & Name -->
+            <td>
+              <div class="item-name-cell">
+                <span class="item-name">{{ item.itemName }}</span>
+                <span class="item-code">{{ item.itemCode }}</span>
+              </div>
+            </td>
+            
+            <!-- Specs -->
+            <td>
+              <div class="item-spec-cell">
+                <span class="brand-val">{{ item.brand }}</span>
+                <span class="model-val">{{ item.model }}</span>
+              </div>
+            </td>
+            
+            <!-- Yesterday's Rate -->
+            <td>
+              <div class="yesterday-rate-cell">
+                <span class="rate-val" *ngIf="item.yesterdayRate > 0">
+                  Rs. {{ item.yesterdayRate | number:'1.2-2' }} <span class="unit-val">/ {{ item.unit }}</span>
+                </span>
+                <span class="rate-val-none" *ngIf="!item.yesterdayRate || item.yesterdayRate === 0">
+                  —
+                </span>
+              </div>
+            </td>
+            
+            <!-- Today's Rate Input -->
+            <td>
+              <div class="rate-input-cell">
+                <span class="currency-prefix">Rs.</span>
+                <input 
+                  type="number" 
+                  [(ngModel)]="item.rate" 
+                  [disabled]="saving || item.isLocked" 
+                  min="0"
+                  step="0.01"
+                  placeholder="0.00"
+                  class="rate-input"
+                />
+                <span class="unit-suffix">/ {{ item.unit }}</span>
+              </div>
+            </td>
+            
+            <!-- Delta -->
+            <td>
+              <div class="delta-cell">
+                <span class="delta-badge" [ngClass]="calculateDiff(item).class">
+                  {{ calculateDiff(item).text }}
+                </span>
+              </div>
+            </td>
+            
+            <!-- Remarks -->
+            <td>
+              <input 
+                type="text" 
+                [(ngModel)]="item.remarks" 
+                [disabled]="saving || item.isLocked" 
+                placeholder="Add notes..."
+                class="remarks-input"
+              />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- COPY PREVIOUS RATES MODAL -->
+  <div *ngIf="showCopyModal" class="copy-modal-backdrop animate-fade-in" (click)="closeCopyModal()">
+    <div class="copy-modal-card glass-card" (click)="$event.stopPropagation()">
+      <div class="copy-modal-header">
+        <h3>📋 Copy Previous Day Rates</h3>
+        <button class="btn-close-modal" (click)="closeCopyModal()">✕</button>
+      </div>
+
+      <div class="copy-modal-body">
+        <p class="copy-hint">Copy rates entered on a previous date into the current target date <strong>{{ selectedDate }}</strong>.</p>
+        
+        <div class="form-group-copy">
+          <label>Source Date to Copy From:</label>
+          <input type="date" [(ngModel)]="copySourceDate" class="copy-date-input" />
+        </div>
+
+        <div class="form-group-checkbox">
+          <label>
+            <input type="checkbox" [(ngModel)]="overwriteCopy" />
+            Overwrite existing rates already set for {{ selectedDate }}
+          </label>
+        </div>
+      </div>
+
+      <div class="copy-modal-footer">
+        <button class="btn-cancel-modal" (click)="closeCopyModal()" [disabled]="copying">Cancel</button>
+        <button class="btn-confirm-copy" (click)="submitCopyRates()" [disabled]="copying">
+          <span *ngIf="!copying">Copy Rates</span>
+          <span *ngIf="copying">Copying...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

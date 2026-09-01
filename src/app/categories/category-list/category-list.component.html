@@ -1,0 +1,54 @@
+<div class="categories-container">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Categories</h1>
+      <p class="page-subtitle">Solar product taxonomy — {{ categories.length }} categories defined</p>
+    </div>
+    <button class="btn-refresh" (click)="load()" [disabled]="loading">
+      <svg class="btn-icon" [class.spinning]="loading" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+      </svg>
+    </button>
+  </div>
+
+  <div *ngIf="errorMessage" class="feedback-banner error">⚠️ {{ errorMessage }}</div>
+
+  <!-- SKELETON -->
+  <div *ngIf="loading" class="cards-grid">
+    <div class="cat-card sk-card" *ngFor="let i of [1,2,3,4,5]">
+      <div class="sk sk-icon"></div>
+      <div class="sk-body"><div class="sk sk-title"></div><div class="sk sk-line"></div></div>
+    </div>
+  </div>
+
+  <!-- CARDS GRID -->
+  <div *ngIf="!loading && categories.length > 0" class="cards-grid animate-fade-in">
+    <div class="cat-card glass-card" *ngFor="let cat of categories; let i = index">
+      <div class="cat-icon-wrap" [class]="'color-' + (i % 5)">
+        <span class="cat-icon">{{ getIcon(cat.name) }}</span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-name-row">
+          <h3 class="cat-name">{{ cat.name }}</h3>
+          <span class="status-badge" [class.active]="cat.isActive" [class.inactive]="!cat.isActive">
+            {{ cat.isActive ? 'Active' : 'Inactive' }}
+          </span>
+        </div>
+        <p class="cat-desc">{{ cat.description || 'No description provided.' }}</p>
+        <div class="cat-meta">
+          <span class="meta-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            </svg>
+            {{ cat.itemCount }} items
+          </span>
+          <span class="meta-chip">Order #{{ cat.displayOrder }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && categories.length === 0" class="empty-state">
+    <div>📦</div><h3>No Categories</h3><p>No product categories have been defined yet.</p>
+  </div>
+</div>

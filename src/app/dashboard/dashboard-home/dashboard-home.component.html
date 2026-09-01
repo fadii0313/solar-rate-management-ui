@@ -1,0 +1,150 @@
+<div class="dashboard-container">
+  <!-- Hero Welcome Banner -->
+  <div class="welcome-banner glass-card">
+    <div class="banner-content">
+      <h1>Solar Rate Management System</h1>
+      <p>Analyze, input, and audit daily retail pricing across multi-tenant shops with complete data isolation.</p>
+      
+      <!-- API Connectivity Status Badge -->
+      <div class="api-status-badge" [class.connected]="apiSuccess">
+        <span class="status-dot"></span>
+        <span class="status-text">{{ apiStatusMessage }}</span>
+      </div>
+    </div>
+    <div class="banner-badge">
+      <svg class="sun-glow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="5" fill="var(--primary)"></circle>
+        <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M5.64 18.36l-1.42 1.42M19.78 4.22l-1.42 1.42" stroke-linecap="round"></path>
+      </svg>
+    </div>
+  </div>
+
+  <!-- METRIC CARD GRID -->
+  <div class="metrics-grid">
+    <!-- Card 1: Active Shops -->
+    <div class="metric-card glass-card border-green">
+      <div class="metric-header">
+        <div class="metric-icon bg-green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        </div>
+        <span class="metric-title">Active Shops</span>
+      </div>
+      <div class="metric-value">{{ stats.shopsCount }}</div>
+      <div class="metric-footer text-green">Tenant Scoped Isolation</div>
+    </div>
+
+    <!-- Card 2: Items Catalog -->
+    <div class="metric-card glass-card border-cyan">
+      <div class="metric-header">
+        <div class="metric-icon bg-cyan">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+        </div>
+        <span class="metric-title">Solar Items</span>
+      </div>
+      <div class="metric-value">{{ stats.itemsCount }}</div>
+      <div class="metric-footer text-cyan">4 Templates + 0 Shop Scoped</div>
+    </div>
+
+    <!-- Card 3: Categories -->
+    <div class="metric-card glass-card border-purple">
+      <div class="metric-header">
+        <div class="metric-icon bg-purple">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+        </div>
+        <span class="metric-title">Categories</span>
+      </div>
+      <div class="metric-value">{{ stats.categoriesCount }}</div>
+      <div class="metric-footer text-purple">Seeded System Templates</div>
+    </div>
+
+    <!-- Card 4: Daily Rate Completion -->
+    <div class="metric-card glass-card border-amber">
+      <div class="metric-header">
+        <div class="metric-icon bg-amber">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+        </div>
+        <span class="metric-title">Rates Entered</span>
+      </div>
+      <div class="metric-value">2 <span class="divider">/</span> {{ stats.itemsCount }}</div>
+      <div class="metric-footer text-amber">50% Completed for Today</div>
+    </div>
+  </div>
+
+  <!-- TABLE AND DETAILS SECTION -->
+  <div class="details-section">
+    <!-- Left panel: Global Catalog template overview -->
+    <div class="overview-table-panel glass-card">
+      <div class="panel-header">
+        <h2>Global Template Catalog Overview</h2>
+        <span class="subtitle">Default item templates available for all shops</span>
+      </div>
+
+      <table class="catalog-table">
+        <thead>
+          <tr>
+            <th>Item Code</th>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Unit</th>
+            <th>Latest Rate</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of templateItems">
+            <td class="code-cell">{{ item.code }}</td>
+            <td class="name-cell">{{ item.name }}</td>
+            <td><span class="category-badge">{{ item.category }}</span></td>
+            <td>{{ item.unit }}</td>
+            <td class="rate-cell">{{ item.rate | number:'1.2-2' }} PKR</td>
+            <td>
+              <span class="status-pill" [class.active]="item.status === 'Active'">
+                {{ item.status }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Right panel: Quick Actions & Help -->
+    <div class="quick-actions-panel glass-card">
+      <div class="panel-header">
+        <h2>System Fast-Track</h2>
+        <span class="subtitle">Frequent operations</span>
+      </div>
+      
+      <div class="actions-list">
+        <a routerLink="/rates/daily-entry" class="action-card">
+          <div class="icon-box bg-amber">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+          </div>
+          <div class="action-info">
+            <h3>Enter Today's Rates</h3>
+            <p>Publish current pricing for all active items</p>
+          </div>
+        </a>
+
+        <a routerLink="/items" class="action-card">
+          <div class="icon-box bg-cyan">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+          </div>
+          <div class="action-info">
+            <h3>Add Custom Shop Item</h3>
+            <p>Create a shop-scoped pricing item</p>
+          </div>
+        </a>
+
+        <a routerLink="/rates/history" class="action-card">
+          <div class="icon-box bg-purple">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          </div>
+          <div class="action-info">
+            <h3>Analyze Rate History</h3>
+            <p>View historical price swings and curves</p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

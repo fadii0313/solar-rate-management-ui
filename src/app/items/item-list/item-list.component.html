@@ -1,0 +1,144 @@
+<div class="items-container">
+  <!-- HEADER -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Solar Items Catalog</h1>
+      <p class="page-subtitle" *ngIf="activeShopId">
+        Viewing items for <span class="shop-highlight">{{ activeShopName }}</span> + global template catalog
+      </p>
+      <p class="page-subtitle" *ngIf="!activeShopId">Global template catalog — select a shop to see shop-specific items</p>
+    </div>
+    <div class="header-actions">
+      <div class="stat-pill">
+        <span class="stat-dot"></span>
+        {{ filtered.length }} of {{ items.length }} Items
+      </div>
+    </div>
+  </div>
+
+  <!-- NO SHOP CONTEXT WARNING -->
+  <div *ngIf="!activeShopId" class="warning-banner animate-fade-in">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="warn-icon">
+      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+      <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+    </svg>
+    No shop context selected — showing global template items only. Select a shop from the header to also see shop-specific items.
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar glass-card animate-fade-in">
+    <!-- Search -->
+    <div class="search-wrapper">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input
+        type="text"
+        placeholder="Search by name, code or brand..."
+        [value]="searchQuery"
+        (input)="searchQuery = $any($event.target).value; onSearch()"
+        class="search-input"
+      />
+    </div>
+
+    <!-- Category Filter Pills -->
+    <div class="category-pills">
+      <button
+        *ngFor="let cat of categories"
+        class="cat-pill"
+        [class.active]="selectedCategory === cat"
+        (click)="onCategoryChange(cat)"
+      >{{ cat }}</button>
+    </div>
+
+    <button class="btn-refresh" (click)="loadItems()" [disabled]="loading">
+      <svg class="btn-icon" [class.spinning]="loading" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="23 4 23 10 17 10"/>
+        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- ERROR -->
+  <div *ngIf="errorMessage" class="feedback-banner error animate-fade-in">
+    <span>⚠️</span> {{ errorMessage }}
+  </div>
+
+  <!-- SKELETON -->
+  <div *ngIf="loading" class="table-card glass-card">
+    <div class="skeleton-rows">
+      <div class="sk-row" *ngFor="let i of [1,2,3,4]">
+        <div class="sk w-10"></div>
+        <div class="sk w-30"></div>
+        <div class="sk w-20"></div>
+        <div class="sk w-15"></div>
+        <div class="sk w-10"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EMPTY STATE -->
+  <div *ngIf="!loading && filtered.length === 0" class="empty-state animate-fade-in">
+    <div class="empty-icon">⚡</div>
+    <h3>No Items Found</h3>
+    <p *ngIf="searchQuery || selectedCategory !== 'All'">Try clearing your filters.</p>
+    <p *ngIf="!searchQuery && selectedCategory === 'All'">No solar items are in the catalog yet.</p>
+  </div>
+
+  <!-- TABLE -->
+  <div *ngIf="!loading && filtered.length > 0" class="table-card glass-card animate-fade-in">
+    <table class="items-table">
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Item Details</th>
+          <th>Category</th>
+          <th>Brand / Model</th>
+          <th>Unit</th>
+          <th>Scope</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of filtered">
+          <!-- Code -->
+          <td><code class="item-code">{{ item.itemCode }}</code></td>
+
+          <!-- Name + Description -->
+          <td>
+            <div class="item-name-cell">
+              <span class="item-name">{{ item.itemName }}</span>
+              <span class="item-desc" *ngIf="item.description">{{ item.description }}</span>
+            </div>
+          </td>
+
+          <!-- Category -->
+          <td><span class="cat-badge">{{ item.categoryName }}</span></td>
+
+          <!-- Brand / Model -->
+          <td>
+            <div class="brand-cell">
+              <span class="brand">{{ item.brand }}</span>
+              <span class="model">{{ item.model }}</span>
+            </div>
+          </td>
+
+          <!-- Unit -->
+          <td><span class="unit-pill">{{ item.unit }}</span></td>
+
+          <!-- Scope (Global vs Shop) -->
+          <td>
+            <span class="scope-badge global" *ngIf="isGlobal(item)">🌐 Global</span>
+            <span class="scope-badge shop" *ngIf="!isGlobal(item)">🏪 Shop</span>
+          </td>
+
+          <!-- Status -->
+          <td>
+            <span class="status-badge active" *ngIf="item.isActive">Active</span>
+            <span class="status-badge inactive" *ngIf="!item.isActive">Inactive</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

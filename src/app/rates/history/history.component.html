@@ -1,0 +1,103 @@
+<div class="history-container">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Rate History</h1>
+      <p class="page-subtitle" *ngIf="activeShopId">Historical price records for <span class="shop-hl">{{ activeShopName }}</span></p>
+      <p class="page-subtitle" *ngIf="!activeShopId">Select a shop to view rate history</p>
+    </div>
+    <div class="stat-pill" *ngIf="filtered.length">
+      <span class="stat-dot"></span>{{ filtered.length }} Records
+    </div>
+  </div>
+
+  <!-- NO SHOP -->
+  <div *ngIf="!activeShopId" class="warning-card animate-fade-in">
+    <div class="warn-icon">⚠️</div>
+    <h3>No Shop Selected</h3>
+    <p>Select a shop from the header dropdown to view its rate history.</p>
+  </div>
+
+  <ng-container *ngIf="activeShopId">
+    <!-- FILTER TOOLBAR -->
+    <div class="toolbar glass-card animate-fade-in">
+      <div class="filter-group">
+        <label>From</label>
+        <input type="date" [value]="fromDate" (change)="fromDate=$any($event.target).value; onFilterChange()" class="date-input" />
+      </div>
+      <div class="filter-group">
+        <label>To</label>
+        <input type="date" [value]="toDate" (change)="toDate=$any($event.target).value; onFilterChange()" class="date-input" />
+      </div>
+      <div class="filter-group">
+        <label>Category</label>
+        <select (change)="selectedCategory=$any($event.target).value; onFilterChange()" class="select-input">
+          <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+        </select>
+      </div>
+      <div class="search-wrapper">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-icon">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="text" placeholder="Search items..." [value]="searchQuery"
+          (input)="searchQuery=$any($event.target).value; onSearch()" class="search-input" />
+      </div>
+      <button class="btn-load" (click)="loadHistory()" [disabled]="loading">
+        <svg class="btn-icon" [class.spinning]="loading" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+        </svg>
+        {{ loading ? 'Loading...' : 'Apply' }}
+      </button>
+    </div>
+
+    <!-- ERROR -->
+    <div *ngIf="errorMessage" class="feedback-banner error">⚠️ {{ errorMessage }}</div>
+
+    <!-- SKELETON -->
+    <div *ngIf="loading" class="glass-card sk-container">
+      <div class="sk-row" *ngFor="let i of [1,2,3,4,5]">
+        <div class="sk w-15"></div><div class="sk w-30"></div>
+        <div class="sk w-15"></div><div class="sk w-20"></div><div class="sk w-10"></div>
+      </div>
+    </div>
+
+    <!-- EMPTY -->
+    <div *ngIf="!loading && filtered.length === 0" class="empty-state">
+      <div>📊</div><h3>No Records Found</h3>
+      <p>No rate entries exist for the selected date range and filters.</p>
+    </div>
+
+    <!-- DATE-GROUPED RECORDS -->
+    <div *ngIf="!loading && filtered.length > 0">
+      <div *ngFor="let date of groupedDates" class="date-group animate-fade-in">
+        <div class="date-divider">
+          <span class="date-label">{{ date | date:'EEEE, MMMM d, y' }}</span>
+          <span class="date-count">{{ getRecordsForDate(date).length }} items</span>
+        </div>
+        <div class="glass-card group-table-card">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>Category</th><th>Item</th><th>Brand</th>
+                <th>Rate</th><th>Remarks</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let r of getRecordsForDate(date)">
+                <td><span class="cat-badge">{{ r.categoryName }}</span></td>
+                <td>
+                  <div class="item-cell">
+                    <span class="item-name">{{ r.itemName }}</span>
+                    <code class="item-code">{{ r.itemCode }}</code>
+                  </div>
+                </td>
+                <td><span class="brand">{{ r.brand }}</span></td>
+                <td><span class="rate-val">Rs. {{ r.rate | number:'1.2-2' }}</span> <span class="unit">/ {{ r.unit }}</span></td>
+                <td><span class="remarks">{{ r.remarks || '—' }}</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

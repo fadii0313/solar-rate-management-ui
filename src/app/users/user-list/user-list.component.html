@@ -1,0 +1,175 @@
+<div class="users-container">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">User Management</h1>
+      <p class="page-subtitle">Create and manage system operators, roles, and shop permissions</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-create" (click)="openModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Add New User
+      </button>
+      <div class="stat-pill"><span class="stat-dot"></span>{{ filtered.length }} Users</div>
+    </div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar glass-card animate-fade-in">
+    <div class="search-wrapper">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-icon">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="text" placeholder="Search by name, username or email..."
+        [value]="searchQuery" (input)="searchQuery=$any($event.target).value; onSearch()" class="search-input" />
+    </div>
+    <button class="btn-refresh" (click)="load()" [disabled]="loading">
+      <svg class="btn-icon" [class.spinning]="loading" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+      </svg> Refresh
+    </button>
+  </div>
+
+  <!-- SUCCESS & ERROR BANNERS -->
+  <div *ngIf="successMessage" class="feedback-banner success animate-fade-in">
+    <span>✅</span> {{ successMessage }}
+  </div>
+  <div *ngIf="errorMessage" class="feedback-banner error animate-fade-in">
+    <span>⚠️</span> {{ errorMessage }}
+  </div>
+
+  <!-- SKELETON -->
+  <div *ngIf="loading" class="glass-card sk-wrapper">
+    <div class="sk-row" *ngFor="let i of [1,2,3]">
+      <div class="sk sk-avatar-sm"></div>
+      <div class="sk-body"><div class="sk w-25"></div><div class="sk w-40"></div></div>
+      <div class="sk w-15"></div><div class="sk w-20"></div>
+    </div>
+  </div>
+
+  <!-- EMPTY -->
+  <div *ngIf="!loading && filtered.length === 0" class="empty-state">
+    <div>👤</div><h3>No Users Found</h3><p>No users match your search criteria.</p>
+  </div>
+
+  <!-- USER TABLE -->
+  <div *ngIf="!loading && filtered.length > 0" class="glass-card table-card animate-fade-in">
+    <table class="users-table">
+      <thead>
+        <tr>
+          <th>User</th><th>Contact</th><th>System Roles</th>
+          <th>Shop Access</th><th>Joined</th><th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of filtered">
+          <td>
+            <div class="user-cell">
+              <div class="user-avatar">{{ getInitials(user.fullName) }}</div>
+              <div>
+                <div class="user-name">{{ user.fullName }}</div>
+                <div class="user-username">&#64;{{ user.username }}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="contact-cell">
+              <span class="email">{{ user.email }}</span>
+              <span class="mobile">{{ user.mobile || '—' }}</span>
+            </div>
+          </td>
+          <td>
+            <div class="roles-cell">
+              <span *ngFor="let role of user.roles" class="role-badge" [ngClass]="getRoleBadgeClass(role)">{{ role }}</span>
+              <span *ngIf="user.roles.length === 0" class="no-role">—</span>
+            </div>
+          </td>
+          <td>
+            <div class="shops-cell">
+              <span *ngFor="let s of user.shops" class="shop-chip">{{ s.name }}</span>
+              <span *ngIf="user.shops.length === 0" class="no-shop">All (SuperAdmin)</span>
+            </div>
+          </td>
+          <td><span class="date-val">{{ user.createdDate | date:'yyyy-MM-dd' }}</span></td>
+          <td>
+            <span class="status-badge" [class.active]="user.isActive" [class.inactive]="!user.isActive">
+              {{ user.isActive ? 'Active' : 'Inactive' }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- CREATE USER MODAL DIALOG -->
+  <div *ngIf="showCreateModal" class="modal-backdrop animate-fade-in" (click)="closeModal()">
+    <div class="modal-card glass-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title">Create New System User</h2>
+        <button class="btn-close" (click)="closeModal()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div *ngIf="errorMessage" class="feedback-banner error modal-err">
+          <span>⚠️</span> {{ errorMessage }}
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>First Name *</label>
+            <input type="text" [value]="newUser.firstName" (input)="newUser.firstName=$any($event.target).value" placeholder="e.g. Ali" class="form-input" />
+          </div>
+
+          <div class="form-group">
+            <label>Last Name *</label>
+            <input type="text" [value]="newUser.lastName" (input)="newUser.lastName=$any($event.target).value" placeholder="e.g. Khan" class="form-input" />
+          </div>
+
+          <div class="form-group">
+            <label>Username *</label>
+            <input type="text" [value]="newUser.username" (input)="newUser.username=$any($event.target).value" placeholder="e.g. ali_operator" class="form-input" />
+          </div>
+
+          <div class="form-group">
+            <label>Email Address *</label>
+            <input type="email" [value]="newUser.email" (input)="newUser.email=$any($event.target).value" placeholder="e.g. ali@solarrate.com" class="form-input" />
+          </div>
+
+          <div class="form-group">
+            <label>Mobile Number</label>
+            <input type="text" [value]="newUser.mobile" (input)="newUser.mobile=$any($event.target).value" placeholder="e.g. +92 300 1234567" class="form-input" />
+          </div>
+
+          <div class="form-group">
+            <label>Initial Password *</label>
+            <input type="password" [value]="newUser.password" (input)="newUser.password=$any($event.target).value" placeholder="Min 6 characters" class="form-input" />
+          </div>
+
+          <div class="form-group">
+            <label>System Role *</label>
+            <select [value]="newUser.roleId" (change)="newUser.roleId=+$any($event.target).value" class="form-select">
+              <option *ngFor="let r of roles" [value]="r.id">{{ r.name }} — {{ r.description }}</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Assigned Shop Context</label>
+            <select [value]="newUser.shopId" (change)="newUser.shopId=$any($event.target).value ? +$any($event.target).value : null" class="form-select">
+              <option [value]="null">All Shops / Unrestricted (SuperAdmin)</option>
+              <option *ngFor="let s of shops" [value]="s.id">{{ s.name }} ({{ s.city }})</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="closeModal()" [disabled]="saving">Cancel</button>
+        <button class="btn-submit" (click)="submitCreateUser()" [disabled]="saving">
+          <span *ngIf="!saving">Create User</span>
+          <span *ngIf="saving">Creating...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

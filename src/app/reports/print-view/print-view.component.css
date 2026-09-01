@@ -1,0 +1,129 @@
+.print-container {
+  padding: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: 'Outfit', 'Inter', sans-serif;
+  color: #e2e8f0;
+}
+
+/* Header & Controls */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+.page-title {
+  font-size: 28px;
+  font-weight: 800;
+  margin: 0 0 6px;
+  background: linear-gradient(135deg, #fff 0%, #cbd5e1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.page-subtitle { font-size: 14px; color: #718096; margin: 0; }
+.shop-hl { color: #00f2fe; font-weight: 600; }
+
+.warning-card { text-align: center; padding: 60px 20px; }
+.warning-card h3 { font-size: 18px; font-weight: 700; margin: 8px 0; }
+.warning-card p { font-size: 14px; color: #718096; }
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 20px;
+  border-radius: 14px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+  background: rgba(18,20,26,0.4);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.filter-group { display: flex; flex-direction: column; gap: 4px; }
+.filter-group label { font-size: 11px; font-weight: 600; text-transform: uppercase; color: #718096; }
+.date-input {
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+}
+.btn-load {
+  padding: 10px 16px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-print {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+.btn-print:hover:not(:disabled) { opacity: 0.95; transform: translateY(-1px); }
+.btn-print:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-icon { width: 15px; height: 15px; }
+
+.feedback-banner.error { background: rgba(229,62,62,0.08); border: 1px solid rgba(229,62,62,0.25); color: #fed7d7; padding: 12px 18px; border-radius: 10px; margin-bottom: 20px; font-size: 14px; }
+.empty-state { text-align: center; padding: 60px 20px; }
+
+/* Printable Sheet Screen Styles */
+.rate-sheet {
+  background: #ffffff;
+  color: #1e293b;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  margin-top: 20px;
+}
+.sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.sheet-logo { font-size: 24px; font-weight: 900; color: #0284c7; }
+.sheet-info { text-align: center; }
+.sheet-shop { font-size: 22px; font-weight: 800; margin: 0; color: #0f172a; }
+.sheet-subtitle { font-size: 13px; color: #64748b; margin: 2px 0 4px; text-transform: uppercase; letter-spacing: 1px; }
+.sheet-date { font-size: 14px; font-weight: 600; color: #334155; margin: 0; }
+.item-count { font-size: 12px; font-weight: 700; background: #e0f2fe; color: #0369a1; padding: 4px 12px; border-radius: 20px; }
+
+.sheet-divider { height: 2px; background: #cbd5e1; margin: 24px 0; }
+
+.cat-section { margin-bottom: 24px; }
+.cat-header { font-size: 14px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
+
+.rate-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.rate-table th { text-align: left; padding: 8px 10px; background: #f8fafc; color: #475569; font-weight: 700; border-bottom: 1px solid #cbd5e1; }
+.rate-table td { padding: 8px 10px; border-bottom: 1px solid #e2e8f0; color: #334155; }
+.rate-table code { font-family: monospace; font-weight: 700; color: #0284c7; }
+.rate-col { font-weight: 800; color: #0f172a; font-size: 14px; }
+
+.sheet-footer { margin-top: 30px; text-align: center; font-size: 11px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 16px; }
+
+/* Print Media Styles */
+@media print {
+  body * { visibility: hidden; }
+  .rate-sheet, .rate-sheet * { visibility: visible; }
+  .rate-sheet { position: absolute; left: 0; top: 0; width: 100%; padding: 0; box-shadow: none; border-radius: 0; }
+  .no-print { display: none !important; }
+}
