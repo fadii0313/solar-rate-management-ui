@@ -8,7 +8,54 @@
 .btn-icon { width: 15px; height: 15px; }
 .btn-icon.spinning { animation: spin 1.2s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
+.header-actions { display: flex; align-items: center; gap: 12px; }
+.btn-create {
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0a0c10;
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn-create:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(251,191,36,0.3); }
+.status-badge-btn {
+  padding: 3px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 20px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.status-badge-btn.active  { background: rgba(72,187,120,0.15); color: #48bb78; border: 1px solid #48bb78; }
+.status-badge-btn.inactive{ background: rgba(229,62,62,0.15); color: #f56565; border: 1px solid #f56565; }
+.status-badge-btn:hover { transform: scale(1.05); }
+
+.admin-actions-row { display: flex; gap: 8px; margin-top: 12px; }
+.btn-edit { flex: 1; padding: 6px 12px; background: rgba(0,242,254,0.1); border: 1px solid rgba(0,242,254,0.3); border-radius: 6px; color: #00f2fe; font-size: 12px; font-weight: 600; cursor: pointer; }
+.btn-delete { flex: 1; padding: 6px 12px; background: rgba(244,63,94,0.1); border: 1px solid rgba(244,63,94,0.3); border-radius: 6px; color: #f43f5e; font-size: 12px; font-weight: 600; cursor: pointer; }
+.btn-edit:hover { background: rgba(0,242,254,0.2); }
+.btn-delete:hover { background: rgba(244,63,94,0.2); }
+
+.feedback-banner.success { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.25); color: #6ee7b7; padding: 12px 18px; border-radius: 10px; margin-bottom: 24px; font-size: 14px; }
 .feedback-banner.error { background: rgba(229,62,62,0.08); border: 1px solid rgba(229,62,62,0.25); color: #fed7d7; padding: 12px 18px; border-radius: 10px; margin-bottom: 24px; font-size: 14px; }
+
+/* Modal */
+.modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+.modal-card { width: 100%; max-width: 480px; padding: 28px; border-radius: 16px; background: #12141a; border: 1px solid rgba(255,255,255,0.1); color: #fff; }
+.modal-card h2 { margin: 0 0 20px; font-size: 20px; font-weight: 700; color: #fbbf24; }
+.modal-form { display: flex; flex-direction: column; gap: 14px; }
+.form-group { display: flex; flex-direction: column; gap: 4px; }
+.form-group label { font-size: 12px; font-weight: 600; color: #a0aec0; }
+.form-group input { padding: 10px 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; outline: none; font-size: 13px; }
+.form-group-checkbox { margin-top: 6px; }
+.form-group-checkbox label { font-size: 13px; color: #cbd5e0; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+.btn-cancel { padding: 10px 18px; background: transparent; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #a0aec0; cursor: pointer; }
+.btn-save-modal { padding: 10px 20px; background: linear-gradient(135deg,#fbbf24,#f59e0b); border: none; border-radius: 8px; color: #0a0c10; font-weight: 700; cursor: pointer; }
 .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
 .cat-card { border-radius: 18px; padding: 24px; display: flex; align-items: flex-start; gap: 18px; transition: border-color 0.3s, transform 0.2s, box-shadow 0.3s; background: rgba(18,20,26,0.4); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.07); }
 .cat-card:hover { transform: translateY(-3px); border-color: rgba(255,255,255,0.12); box-shadow: 0 12px 30px rgba(0,0,0,0.25); }

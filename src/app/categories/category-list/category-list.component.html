@@ -4,22 +4,20 @@
       <h1 class="page-title">Categories</h1>
       <p class="page-subtitle">Solar product taxonomy — {{ categories.length }} categories defined</p>
     </div>
-    <button class="btn-refresh" (click)="load()" [disabled]="loading">
-      <svg class="btn-icon" [class.spinning]="loading" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
-      </svg>
-    </button>
-  </div>
-
-  <div *ngIf="errorMessage" class="feedback-banner error">⚠️ {{ errorMessage }}</div>
-
-  <!-- SKELETON -->
-  <div *ngIf="loading" class="cards-grid">
-    <div class="cat-card sk-card" *ngFor="let i of [1,2,3,4,5]">
-      <div class="sk sk-icon"></div>
-      <div class="sk-body"><div class="sk sk-title"></div><div class="sk sk-line"></div></div>
+    <div class="header-actions">
+      <button *ngIf="isSuperAdmin()" class="btn-create" (click)="openCreateModal()">
+        ➕ Add Category
+      </button>
+      <button class="btn-refresh" (click)="load()" [disabled]="loading">
+        <svg class="btn-icon" [class.spinning]="loading" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+        </svg>
+      </button>
     </div>
   </div>
+
+  <div *ngIf="successMessage" class="feedback-banner success">✅ {{ successMessage }}</div>
+  <div *ngIf="errorMessage" class="feedback-banner error">⚠️ {{ errorMessage }}</div>
 
   <!-- CARDS GRID -->
   <div *ngIf="!loading && categories.length > 0" class="cards-grid animate-fade-in">
@@ -30,25 +28,62 @@
       <div class="cat-body">
         <div class="cat-name-row">
           <h3 class="cat-name">{{ cat.name }}</h3>
-          <span class="status-badge" [class.active]="cat.isActive" [class.inactive]="!cat.isActive">
+          <button 
+            *ngIf="isSuperAdmin()" 
+            class="status-badge-btn" 
+            [class.active]="cat.isActive" 
+            [class.inactive]="!cat.isActive"
+            (click)="toggleCategoryStatus(cat)"
+            title="Click to toggle Active / Inactive status"
+          >
+            {{ cat.isActive ? 'Active' : 'Inactive' }}
+          </button>
+          <span *ngIf="!isSuperAdmin()" class="status-badge" [class.active]="cat.isActive" [class.inactive]="!cat.isActive">
             {{ cat.isActive ? 'Active' : 'Inactive' }}
           </span>
         </div>
         <p class="cat-desc">{{ cat.description || 'No description provided.' }}</p>
         <div class="cat-meta">
-          <span class="meta-chip">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px">
-              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-            </svg>
-            {{ cat.itemCount }} items
-          </span>
+          <span class="meta-chip">📦 {{ cat.itemCount }} items</span>
           <span class="meta-chip">Order #{{ cat.displayOrder }}</span>
+        </div>
+        <div *ngIf="isSuperAdmin()" class="admin-actions-row">
+          <button class="btn-edit" (click)="openEditModal(cat)">✏️ Edit</button>
+          <button class="btn-delete" (click)="deleteCategory(cat)">🗑️ Delete</button>
         </div>
       </div>
     </div>
   </div>
 
-  <div *ngIf="!loading && categories.length === 0" class="empty-state">
-    <div>📦</div><h3>No Categories</h3><p>No product categories have been defined yet.</p>
+  <!-- CATEGORY MODAL DIALOG -->
+  <div *ngIf="showModal" class="modal-backdrop animate-fade-in">
+    <div class="modal-card glass-card">
+      <h2>{{ isEditMode ? 'Edit Category' : 'Add New Category' }}</h2>
+      <div class="modal-form">
+        <div class="form-group">
+          <label>Category Name *</label>
+          <input type="text" [(ngModel)]="categoryForm.name" placeholder="e.g. Solar Inverters" />
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <input type="text" [(ngModel)]="categoryForm.description" placeholder="Short description" />
+        </div>
+        <div class="form-group">
+          <label>Display Order</label>
+          <input type="number" [(ngModel)]="categoryForm.displayOrder" />
+        </div>
+        <div class="form-group-checkbox">
+          <label>
+            <input type="checkbox" [(ngModel)]="categoryForm.isActive" /> Active Status
+          </label>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="closeModal()">Cancel</button>
+        <button class="btn-save-modal" (click)="saveCategory()" [disabled]="saving">
+          {{ saving ? 'Saving...' : (isEditMode ? 'Update Category' : 'Create Category') }}
+        </button>
+      </div>
+    </div>
   </div>
 </div>

@@ -59,6 +59,11 @@ export class AuthService {
     return this.currentUserValue?.shops || [];
   }
 
+  public isSuperAdmin(): boolean {
+    const roles = this.currentUserValue?.roles || [];
+    return roles.includes('SuperAdmin');
+  }
+
   login(credentials: { username: string; password: string }): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials).pipe(
       map(user => {

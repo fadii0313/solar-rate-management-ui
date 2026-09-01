@@ -9,6 +9,9 @@
       <p class="page-subtitle" *ngIf="!activeShopId">Global template catalog — select a shop to see shop-specific items</p>
     </div>
     <div class="header-actions">
+      <button *ngIf="isSuperAdmin()" class="btn-create" (click)="openCreateModal()">
+        ➕ Add Solar Item
+      </button>
       <div class="stat-pill">
         <span class="stat-dot"></span>
         {{ filtered.length }} of {{ items.length }} Items
@@ -16,13 +19,12 @@
     </div>
   </div>
 
-  <!-- NO SHOP CONTEXT WARNING -->
-  <div *ngIf="!activeShopId" class="warning-banner animate-fade-in">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="warn-icon">
-      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-      <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-    </svg>
-    No shop context selected — showing global template items only. Select a shop from the header to also see shop-specific items.
+  <!-- SUCCESS / ERROR BANNERS -->
+  <div *ngIf="successMessage" class="feedback-banner success animate-fade-in">
+    <span>✅</span> {{ successMessage }}
+  </div>
+  <div *ngIf="errorMessage" class="feedback-banner error animate-fade-in">
+    <span>⚠️</span> {{ errorMessage }}
   </div>
 
   <!-- TOOLBAR -->
@@ -59,32 +61,6 @@
     </button>
   </div>
 
-  <!-- ERROR -->
-  <div *ngIf="errorMessage" class="feedback-banner error animate-fade-in">
-    <span>⚠️</span> {{ errorMessage }}
-  </div>
-
-  <!-- SKELETON -->
-  <div *ngIf="loading" class="table-card glass-card">
-    <div class="skeleton-rows">
-      <div class="sk-row" *ngFor="let i of [1,2,3,4]">
-        <div class="sk w-10"></div>
-        <div class="sk w-30"></div>
-        <div class="sk w-20"></div>
-        <div class="sk w-15"></div>
-        <div class="sk w-10"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- EMPTY STATE -->
-  <div *ngIf="!loading && filtered.length === 0" class="empty-state animate-fade-in">
-    <div class="empty-icon">⚡</div>
-    <h3>No Items Found</h3>
-    <p *ngIf="searchQuery || selectedCategory !== 'All'">Try clearing your filters.</p>
-    <p *ngIf="!searchQuery && selectedCategory === 'All'">No solar items are in the catalog yet.</p>
-  </div>
-
   <!-- TABLE -->
   <div *ngIf="!loading && filtered.length > 0" class="table-card glass-card animate-fade-in">
     <table class="items-table">
@@ -97,6 +73,7 @@
           <th>Unit</th>
           <th>Scope</th>
           <th>Status</th>
+          <th *ngIf="isSuperAdmin()">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -134,11 +111,89 @@
 
           <!-- Status -->
           <td>
-            <span class="status-badge active" *ngIf="item.isActive">Active</span>
-            <span class="status-badge inactive" *ngIf="!item.isActive">Inactive</span>
+            <button 
+              *ngIf="isSuperAdmin()" 
+              class="status-badge-btn" 
+              [class.active]="item.isActive" 
+              [class.inactive]="!item.isActive"
+              (click)="toggleItemStatus(item)"
+              title="Click to toggle Active / Inactive status"
+            >
+              {{ item.isActive ? 'Active' : 'Inactive' }}
+            </button>
+            <span *ngIf="!isSuperAdmin()" class="status-badge" [class.active]="item.isActive" [class.inactive]="!item.isActive">
+              {{ item.isActive ? 'Active' : 'Inactive' }}
+            </span>
+          </td>
+
+          <!-- Admin Actions -->
+          <td *ngIf="isSuperAdmin()">
+            <div class="admin-actions-cell">
+              <button class="btn-icon-action btn-edit" (click)="openEditModal(item)" title="Edit Item">✏️</button>
+              <button class="btn-icon-action btn-delete" (click)="deleteItem(item)" title="Delete Item">🗑️</button>
+            </div>
           </td>
         </tr>
       </tbody>
     </table>
+  </div>
+
+  <!-- ITEM MODAL DIALOG -->
+  <div *ngIf="showModal" class="modal-backdrop animate-fade-in">
+    <div class="modal-card glass-card">
+      <h2>{{ isEditMode ? 'Edit Solar Item' : 'Add New Solar Item' }}</h2>
+      <div class="modal-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Item Code *</label>
+            <input type="text" [(ngModel)]="itemForm.itemCode" placeholder="e.g. SOL-550W" />
+          </div>
+          <div class="form-group">
+            <label>Category *</label>
+            <select [(ngModel)]="itemForm.categoryId">
+              <option *ngFor="let cat of categoryOptions" [value]="cat.id">{{ cat.name }}</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Item Name *</label>
+          <input type="text" [(ngModel)]="itemForm.itemName" placeholder="e.g. Longi Hi-MO 6 Mono 550W Panel" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Brand</label>
+            <input type="text" [(ngModel)]="itemForm.brand" placeholder="e.g. Longi" />
+          </div>
+          <div class="form-group">
+            <label>Model</label>
+            <input type="text" [(ngModel)]="itemForm.model" placeholder="e.g. LR5-72HPH-550M" />
+          </div>
+          <div class="form-group">
+            <label>Unit</label>
+            <select [(ngModel)]="itemForm.unit">
+              <option value="Watt">Watt</option>
+              <option value="Piece">Piece</option>
+              <option value="Set">Set</option>
+              <option value="Meter">Meter</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <input type="text" [(ngModel)]="itemForm.description" placeholder="Technical specs or details" />
+        </div>
+        <div class="form-group-checkbox">
+          <label>
+            <input type="checkbox" [(ngModel)]="itemForm.isActive" /> Active Status
+          </label>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="closeModal()">Cancel</button>
+        <button class="btn-save-modal" (click)="saveItem()" [disabled]="saving">
+          {{ saving ? 'Saving...' : (isEditMode ? 'Update Item' : 'Create Item') }}
+        </button>
+      </div>
+    </div>
   </div>
 </div>
