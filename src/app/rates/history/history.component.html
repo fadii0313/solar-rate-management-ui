@@ -47,6 +47,10 @@
         </svg>
         {{ loading ? 'Loading...' : 'Apply' }}
       </button>
+
+      <button class="btn-export-hist" (click)="exportHistoryToExcel()" [disabled]="loading || !filtered.length" title="Export rate history to CSV/Excel">
+        📊 Export CSV
+      </button>
     </div>
 
     <!-- ERROR -->

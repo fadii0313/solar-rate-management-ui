@@ -18,6 +18,9 @@
       </svg>
       {{ loading ? 'Loading...' : 'Refresh' }}
     </button>
+    <button class="btn-export-cmp" (click)="exportCompareToExcel()" [disabled]="loading || !data?.items?.length" title="Export comparison grid to CSV/Excel">
+      📊 Export CSV
+    </button>
     <div class="legend">
       <span class="legend-dot lowest"></span><span class="legend-label">Lowest Price</span>
       <span class="legend-dot higher"></span><span class="legend-label">Higher</span>

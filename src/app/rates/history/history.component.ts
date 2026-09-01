@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ShopContextService } from '../../core/services/shop-context.service';
+import { ExportService } from '../../core/services/export.service';
 import { Subscription } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
@@ -38,7 +39,11 @@ export class HistoryComponent implements OnInit, OnDestroy {
 
   private subs = new Subscription();
 
-  constructor(private http: HttpClient, private shopCtx: ShopContextService) {}
+  constructor(
+    private http: HttpClient, 
+    private shopCtx: ShopContextService,
+    private exportService: ExportService
+  ) {}
 
   ngOnInit(): void {
     this.loadCategories();
@@ -96,5 +101,20 @@ export class HistoryComponent implements OnInit, OnDestroy {
 
   getRecordsForDate(date: string): HistoryRecord[] {
     return this.filtered.filter(r => r.rateDate.split('T')[0] === date);
+  }
+
+  exportHistoryToExcel(): void {
+    if (!this.filtered || !this.filtered.length) return;
+    const exportRows = this.filtered.map(r => ({
+      'Date': r.rateDate.split('T')[0],
+      'Item Code': r.itemCode,
+      'Item Name': r.itemName,
+      'Category': r.categoryName,
+      'Brand': r.brand,
+      'Unit': r.unit,
+      'Rate (PKR)': r.rate,
+      'Remarks': r.remarks
+    }));
+    this.exportService.exportToCsv(`Solar_Rate_History_${this.activeShopName}_${this.fromDate}_to_${this.toDate}`, exportRows);
   }
 }

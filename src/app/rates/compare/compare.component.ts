@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { ExportService } from '../../core/services/export.service';
 import { environment } from '../../../environments/environment';
 
 interface ShopRef { id: number; name: string; }
@@ -25,7 +26,10 @@ export class CompareComponent implements OnInit {
   errorMessage = '';
   selectedDate = new Date().toISOString().split('T')[0];
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private exportService: ExportService
+  ) {}
   ngOnInit(): void { this.load(); }
 
   load(): void {
@@ -54,5 +58,25 @@ export class CompareComponent implements OnInit {
     if (rate === min) return 'Lowest';
     const pct = ((rate - min) / min * 100).toFixed(1);
     return `+${pct}%`;
+  }
+
+  exportCompareToExcel(): void {
+    if (!this.data || !this.data.items.length) return;
+    const exportRows = this.data.items.map(item => {
+      const row: any = {
+        'Category': item.categoryName,
+        'Item Code': item.itemCode,
+        'Item Name': item.itemName,
+        'Brand': item.brand,
+        'Unit': item.unit,
+        'Lowest Rate (PKR)': this.lowestRate(item) ?? '—'
+      };
+      this.data?.shops.forEach(s => {
+        const sr = item.shopRates.find(r => r.shopId === s.id);
+        row[s.name] = sr?.rate ? `Rs. ${sr.rate}` : 'N/A';
+      });
+      return row;
+    });
+    this.exportService.exportToCsv(`MultiShop_Rate_Comparison_${this.selectedDate}`, exportRows);
   }
 }

@@ -57,6 +57,15 @@
         </button>
 
         <button 
+          class="btn-export" 
+          (click)="exportRatesToExcel()" 
+          [disabled]="loading || rates.length === 0"
+          title="Export rate sheet to Excel / CSV"
+        >
+          📊 Export CSV / Excel
+        </button>
+
+        <button 
           class="btn-save" 
           (click)="saveRates()" 
           [disabled]="loading || saving || rates.length === 0"

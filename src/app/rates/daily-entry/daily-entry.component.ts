@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ShopContextService } from '../../core/services/shop-context.service';
+import { ExportService } from '../../core/services/export.service';
 import { Subscription } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
@@ -44,7 +45,8 @@ export class DailyEntryComponent implements OnInit, OnDestroy {
 
   constructor(
     private http: HttpClient,
-    private shopContextService: ShopContextService
+    private shopContextService: ShopContextService,
+    private exportService: ExportService
   ) {}
 
   ngOnInit(): void {
@@ -175,5 +177,21 @@ export class DailyEntryComponent implements OnInit, OnDestroy {
         this.errorMessage = err.error?.message || err.error?.Message || 'Failed to copy rates.';
       }
     });
+  }
+
+  exportRatesToExcel(): void {
+    if (!this.rates || !this.rates.length) return;
+    const exportRows = this.rates.map(r => ({
+      'Item Code': r.itemCode,
+      'Item Name': r.itemName,
+      'Category': r.categoryName,
+      'Brand': r.brand,
+      'Unit': r.unit,
+      'Today Rate': r.rate,
+      'Yesterday Rate': r.yesterdayRate,
+      'Change %': this.calculateDiff(r).text,
+      'Remarks': r.remarks
+    }));
+    this.exportService.exportToCsv(`Daily_Rates_${this.activeShopName}_${this.selectedDate}`, exportRows);
   }
 }
