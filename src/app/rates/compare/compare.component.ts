@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 interface ShopRef { id: number; name: string; }
 interface ItemCompare {
@@ -30,7 +31,7 @@ export class CompareComponent implements OnInit {
   load(): void {
     this.loading = true;
     this.errorMessage = '';
-    this.http.get<CompareResponse>(`http://localhost:5136/api/rates/compare?date=${this.selectedDate}`).subscribe({
+    this.http.get<CompareResponse>(`${environment.apiUrl}/rates/compare?date=${this.selectedDate}`).subscribe({
       next: d => { this.data = d; this.loading = false; },
       error: err => { this.errorMessage = err.error?.message || 'Failed to load comparison data.'; this.loading = false; }
     });

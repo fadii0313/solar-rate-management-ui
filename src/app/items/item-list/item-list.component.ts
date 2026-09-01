@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ShopContextService } from '../../core/services/shop-context.service';
 import { Subscription } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 interface Item {
   id: number;
@@ -57,7 +58,7 @@ export class ItemListComponent implements OnInit, OnDestroy {
   loadItems(): void {
     this.loading = true;
     this.errorMessage = '';
-    this.http.get<Item[]>('http://localhost:5136/api/items').subscribe({
+    this.http.get<Item[]>(`${environment.apiUrl}/items`).subscribe({
       next: (data) => {
         this.items = data || [];
         this.categories = ['All', ...new Set(this.items.map(i => i.categoryName))];

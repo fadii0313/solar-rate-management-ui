@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 interface AuditLog {
   id: number;
@@ -32,7 +33,7 @@ export class AuditLogListComponent implements OnInit {
     this.loading = true;
     this.errorMessage = '';
 
-    this.http.get<AuditLog[]>('http://localhost:5136/api/auditlogs').subscribe({
+    this.http.get<AuditLog[]>(`${environment.apiUrl}/auditlogs`).subscribe({
       next: (data) => {
         this.logs = data || [];
         this.loading = false;

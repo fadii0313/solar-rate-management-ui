@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 interface DashboardStats {
   categoriesCount: number;
@@ -38,7 +39,7 @@ export class DashboardHomeComponent implements OnInit {
   }
 
   fetchDbStats() {
-    this.http.get<any>('http://localhost:5136/api/testdb/status').subscribe({
+    this.http.get<any>(`${environment.apiUrl}/testdb/status`).subscribe({
       next: (response) => {
         if (response && response.success) {
           this.stats.categoriesCount = response.data.categoriesCount;

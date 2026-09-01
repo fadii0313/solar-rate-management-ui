@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ShopContextService } from '../../core/services/shop-context.service';
 import { Subscription } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 interface PrintItem {
   itemCode: string; itemName: string; brand: string;
@@ -38,7 +39,7 @@ export class PrintViewComponent implements OnInit, OnDestroy {
     if (!this.activeShopId) { this.items = []; return; }
     this.loading = true;
     this.errorMessage = '';
-    this.http.get<any[]>(`http://localhost:5136/api/rates/daily?date=${this.selectedDate}`).subscribe({
+    this.http.get<any[]>(`${environment.apiUrl}/rates/daily?date=${this.selectedDate}`).subscribe({
       next: data => {
         this.items = (data || []).filter(d => d.rate > 0).map(d => ({
           itemCode: d.itemCode, itemName: d.itemName, brand: d.brand,

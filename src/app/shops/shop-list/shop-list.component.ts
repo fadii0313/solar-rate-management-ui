@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 interface Shop {
   id: number;
@@ -33,7 +34,7 @@ export class ShopListComponent implements OnInit {
   loadShops(): void {
     this.loading = true;
     this.errorMessage = '';
-    this.http.get<Shop[]>('http://localhost:5136/api/shops').subscribe({
+    this.http.get<Shop[]>(`${environment.apiUrl}/shops`).subscribe({
       next: (data) => {
         this.shops = data || [];
         this.filtered = [...this.shops];

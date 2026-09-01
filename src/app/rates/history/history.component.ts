@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ShopContextService } from '../../core/services/shop-context.service';
 import { Subscription } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 interface HistoryRecord {
   id: number;
@@ -51,7 +52,7 @@ export class HistoryComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void { this.subs.unsubscribe(); }
 
   loadCategories(): void {
-    this.http.get<string[]>('http://localhost:5136/api/rates/history/categories').subscribe({
+    this.http.get<string[]>(`${environment.apiUrl}/rates/history/categories`).subscribe({
       next: cats => this.categories = ['All', ...cats],
       error: () => {}
     });
@@ -61,7 +62,7 @@ export class HistoryComponent implements OnInit, OnDestroy {
     if (!this.activeShopId) { this.records = []; this.filtered = []; return; }
     this.loading = true;
     this.errorMessage = '';
-    const url = `http://localhost:5136/api/rates/history?fromDate=${this.fromDate}&toDate=${this.toDate}&category=${this.selectedCategory}`;
+    const url = `${environment.apiUrl}/rates/history?fromDate=${this.fromDate}&toDate=${this.toDate}&category=${this.selectedCategory}`;
     this.http.get<HistoryRecord[]>(url).subscribe({
       next: data => {
         this.records = data || [];

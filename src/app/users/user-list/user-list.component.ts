@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 interface UserRecord {
   id: number; fullName: string; username: string;
@@ -53,18 +54,18 @@ export class UserListComponent implements OnInit {
   load(): void {
     this.loading = true;
     this.errorMessage = '';
-    this.http.get<UserRecord[]>('http://localhost:5136/api/users').subscribe({
+    this.http.get<UserRecord[]>(`${environment.apiUrl}/users`).subscribe({
       next: d => { this.users = d || []; this.applySearch(); this.loading = false; },
       error: err => { this.errorMessage = err.error?.message || 'Failed to load users.'; this.loading = false; }
     });
   }
 
   loadRolesAndShops(): void {
-    this.http.get<RoleOption[]>('http://localhost:5136/api/users/roles').subscribe({
+    this.http.get<RoleOption[]>(`${environment.apiUrl}/users/roles`).subscribe({
       next: r => { this.roles = r || []; if (this.roles.length) this.newUser.roleId = this.roles[0].id; },
       error: () => {}
     });
-    this.http.get<ShopOption[]>('http://localhost:5136/api/shops').subscribe({
+    this.http.get<ShopOption[]>(`${environment.apiUrl}/shops`).subscribe({
       next: s => this.shops = s || [],
       error: () => {}
     });
@@ -111,7 +112,7 @@ export class UserListComponent implements OnInit {
 
     this.saving = true;
     this.errorMessage = '';
-    this.http.post('http://localhost:5136/api/users', this.newUser).subscribe({
+    this.http.post(`${environment.apiUrl}/users`, this.newUser).subscribe({
       next: () => {
         this.saving = false;
         this.showCreateModal = false;

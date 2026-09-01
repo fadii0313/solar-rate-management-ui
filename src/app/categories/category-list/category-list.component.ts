@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 interface Category {
   id: number; name: string; description: string;
@@ -21,7 +22,7 @@ export class CategoryListComponent implements OnInit {
 
   load(): void {
     this.loading = true;
-    this.http.get<Category[]>('http://localhost:5136/api/categories').subscribe({
+    this.http.get<Category[]>(`${environment.apiUrl}/categories`).subscribe({
       next: d => { this.categories = d || []; this.loading = false; },
       error: err => { this.errorMessage = err.error?.message || 'Failed to load categories.'; this.loading = false; }
     });

@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ShopContextService } from '../../core/services/shop-context.service';
 import { Subscription } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 interface DailyRateItem {
   itemId: number;
@@ -79,7 +80,7 @@ export class DailyEntryComponent implements OnInit, OnDestroy {
     this.successMessage = '';
     this.errorMessage = '';
 
-    const url = `http://localhost:5136/api/rates/daily?date=${this.selectedDate}`;
+    const url = `${environment.apiUrl}/rates/daily?date=${this.selectedDate}`;
     this.http.get<DailyRateItem[]>(url).subscribe({
       next: (data) => {
         this.rates = data || [];
@@ -123,7 +124,7 @@ export class DailyEntryComponent implements OnInit, OnDestroy {
       remarks: item.remarks || ''
     }));
 
-    const url = `http://localhost:5136/api/rates/daily?date=${this.selectedDate}`;
+    const url = `${environment.apiUrl}/rates/daily?date=${this.selectedDate}`;
     this.http.post<any>(url, payload).subscribe({
       next: (res) => {
         this.successMessage = res.message || 'Daily rates saved successfully!';
@@ -161,7 +162,7 @@ export class DailyEntryComponent implements OnInit, OnDestroy {
       overwriteExisting: this.overwriteCopy
     };
 
-    this.http.post<any>('http://localhost:5136/api/rates/copy', payload).subscribe({
+    this.http.post<any>(`${environment.apiUrl}/rates/copy`, payload).subscribe({
       next: (res) => {
         this.copying = false;
         this.showCopyModal = false;
