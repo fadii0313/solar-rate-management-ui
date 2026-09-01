@@ -94,10 +94,14 @@ export class AppComponent {
     this.authService.logout().subscribe({
       next: () => {
         this.shopContextService.clear();
+        localStorage.clear();
+        sessionStorage.clear();
         this.router.navigate(['/auth/login']);
       },
       error: () => {
         this.shopContextService.clear();
+        localStorage.clear();
+        sessionStorage.clear();
         this.router.navigate(['/auth/login']);
       }
     });

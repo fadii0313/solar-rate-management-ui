@@ -101,20 +101,16 @@ export class AuthService {
   logout(): Observable<any> {
     const currentRefresh = this.refreshTokenValue;
     
-    // Clear local storage and state immediately
-    localStorage.removeItem('solar_auth_user');
-    localStorage.removeItem('solar_active_shop_id');
-    localStorage.removeItem('solar_active_shop_name');
+    // Clear all storage cache completely
+    localStorage.clear();
+    sessionStorage.clear();
     this.currentUserSubject.next(null);
 
     if (currentRefresh) {
       return this.http.post(`${this.apiUrl}/logout`, JSON.stringify(currentRefresh), {
         headers: { 'Content-Type': 'application/json' }
       }).pipe(
-        catchError(err => {
-          // Suppress errors during logout
-          return [];
-        })
+        catchError(() => [])
       );
     }
     return new Observable(sub => {
