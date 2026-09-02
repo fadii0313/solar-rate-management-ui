@@ -5,7 +5,7 @@
       <p class="page-subtitle">Create and manage system operators, roles, and shop permissions</p>
     </div>
     <div class="header-actions">
-      <button class="btn-create" (click)="openModal()">
+      <button *ngIf="isSuperAdmin()" class="btn-create" (click)="openCreateModal()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon">
           <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
         </svg>
@@ -60,6 +60,7 @@
         <tr>
           <th>User</th><th>Contact</th><th>System Roles</th>
           <th>Shop Access</th><th>Joined</th><th>Status</th>
+          <th *ngIf="isSuperAdmin()" style="text-align: right;">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -93,20 +94,33 @@
           </td>
           <td><span class="date-val">{{ user.createdDate | date:'yyyy-MM-dd' }}</span></td>
           <td>
-            <span class="status-badge" [class.active]="user.isActive" [class.inactive]="!user.isActive">
+            <button *ngIf="isSuperAdmin(); else readOnlyStatus"
+              class="status-badge-btn" [class.active]="user.isActive" [class.inactive]="!user.isActive"
+              (click)="toggleUserStatus(user)">
               {{ user.isActive ? 'Active' : 'Inactive' }}
-            </span>
+            </button>
+            <ng-template #readOnlyStatus>
+              <span class="status-badge" [class.active]="user.isActive" [class.inactive]="!user.isActive">
+                {{ user.isActive ? 'Active' : 'Inactive' }}
+              </span>
+            </ng-template>
+          </td>
+          <td *ngIf="isSuperAdmin()">
+            <div class="admin-actions-cell" style="justify-content: flex-end;">
+              <button class="btn-icon-action btn-edit" title="Edit User" (click)="openEditModal(user)">✏️</button>
+              <button class="btn-icon-action btn-delete" title="Delete User" (click)="deleteUser(user)">🗑️</button>
+            </div>
           </td>
         </tr>
       </tbody>
     </table>
   </div>
 
-  <!-- CREATE USER MODAL DIALOG -->
-  <div *ngIf="showCreateModal" class="modal-backdrop animate-fade-in" (click)="closeModal()">
+  <!-- USER MODAL DIALOG (CREATE / EDIT) -->
+  <div *ngIf="showModal" class="modal-backdrop animate-fade-in" (click)="closeModal()">
     <div class="modal-card glass-card" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2 class="modal-title">Create New System User</h2>
+        <h2 class="modal-title">{{ isEditMode ? 'Edit System User' : 'Create New System User' }}</h2>
         <button class="btn-close" (click)="closeModal()">✕</button>
       </div>
 
@@ -118,56 +132,60 @@
         <div class="form-grid">
           <div class="form-group">
             <label>First Name *</label>
-            <input type="text" [value]="newUser.firstName" (input)="newUser.firstName=$any($event.target).value" placeholder="e.g. Ali" class="form-input" />
+            <input type="text" [(ngModel)]="userForm.firstName" placeholder="e.g. Ali" class="form-input" />
           </div>
 
           <div class="form-group">
             <label>Last Name *</label>
-            <input type="text" [value]="newUser.lastName" (input)="newUser.lastName=$any($event.target).value" placeholder="e.g. Khan" class="form-input" />
+            <input type="text" [(ngModel)]="userForm.lastName" placeholder="e.g. Khan" class="form-input" />
           </div>
 
           <div class="form-group">
             <label>Username *</label>
-            <input type="text" [value]="newUser.username" (input)="newUser.username=$any($event.target).value" placeholder="e.g. ali_operator" class="form-input" />
+            <input type="text" [(ngModel)]="userForm.username" placeholder="e.g. ali_operator" class="form-input" />
           </div>
 
           <div class="form-group">
             <label>Email Address *</label>
-            <input type="email" [value]="newUser.email" (input)="newUser.email=$any($event.target).value" placeholder="e.g. ali@solarrate.com" class="form-input" />
+            <input type="email" [(ngModel)]="userForm.email" placeholder="e.g. ali@solarrate.com" class="form-input" />
           </div>
 
           <div class="form-group">
             <label>Mobile Number</label>
-            <input type="text" [value]="newUser.mobile" (input)="newUser.mobile=$any($event.target).value" placeholder="e.g. +92 300 1234567" class="form-input" />
+            <input type="text" [(ngModel)]="userForm.mobile" placeholder="e.g. +92 300 1234567" class="form-input" />
           </div>
 
           <div class="form-group">
-            <label>Initial Password *</label>
-            <input type="password" [value]="newUser.password" (input)="newUser.password=$any($event.target).value" placeholder="Min 6 characters" class="form-input" />
+            <label>{{ isEditMode ? 'New Password (leave blank to keep current)' : 'Initial Password *' }}</label>
+            <input type="password" [(ngModel)]="userForm.password" placeholder="Min 6 characters" class="form-input" />
           </div>
 
           <div class="form-group">
             <label>System Role *</label>
-            <select [value]="newUser.roleId" (change)="newUser.roleId=+$any($event.target).value" class="form-select">
+            <select [(ngModel)]="userForm.roleId" class="form-select">
               <option *ngFor="let r of roles" [value]="r.id">{{ r.name }} — {{ r.description }}</option>
             </select>
           </div>
 
           <div class="form-group">
             <label>Assigned Shop Context</label>
-            <select [value]="newUser.shopId" (change)="newUser.shopId=$any($event.target).value ? +$any($event.target).value : null" class="form-select">
-              <option [value]="null">All Shops / Unrestricted (SuperAdmin)</option>
+            <select [(ngModel)]="userForm.shopId" class="form-select">
+              <option [ngValue]="null">All Shops / Unrestricted (SuperAdmin)</option>
               <option *ngFor="let s of shops" [value]="s.id">{{ s.name }} ({{ s.city }})</option>
             </select>
+          </div>
+
+          <div class="form-group form-group-checkbox" *ngIf="isEditMode">
+            <label><input type="checkbox" [(ngModel)]="userForm.isActive" /> Active User Account</label>
           </div>
         </div>
       </div>
 
       <div class="modal-footer">
         <button class="btn-cancel" (click)="closeModal()" [disabled]="saving">Cancel</button>
-        <button class="btn-submit" (click)="submitCreateUser()" [disabled]="saving">
-          <span *ngIf="!saving">Create User</span>
-          <span *ngIf="saving">Creating...</span>
+        <button class="btn-submit" (click)="saveUser()" [disabled]="saving">
+          <span *ngIf="!saving">{{ isEditMode ? 'Update User' : 'Create User' }}</span>
+          <span *ngIf="saving">Saving...</span>
         </button>
       </div>
     </div>

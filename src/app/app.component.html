@@ -119,12 +119,36 @@
         <!-- Right side: Notifications & User Profile -->
         <div class="header-right">
           <!-- Notification Bell -->
-          <div class="header-action-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-            </svg>
-            <span class="badge">2</span>
+          <div class="notification-container">
+            <div class="header-action-btn" (click)="toggleNotificationDropdown()" title="Daily Rate Update Alerts">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+              </svg>
+              <span *ngIf="unreadCount > 0" class="badge">{{ unreadCount }}</span>
+            </div>
+
+            <!-- Notification Dropdown Card -->
+            <div class="notification-dropdown-card glass-card" [class.show]="showNotificationDropdown">
+              <div class="noti-header">
+                <div class="noti-title">
+                  <span>🔔</span> Rate Update Notifications
+                </div>
+                <button *ngIf="notifications.length > 0" class="btn-clear-noti" (click)="clearNotifications()">Clear All</button>
+              </div>
+              <div class="noti-body">
+                <div *ngIf="notifications.length === 0" class="noti-empty">
+                  <span>✨</span> No recent rate updates from shop offices.
+                </div>
+                <div *ngFor="let n of notifications" class="noti-item">
+                  <div class="noti-icon-badge">⚡</div>
+                  <div class="noti-content">
+                    <div class="noti-msg">{{ n.message }}</div>
+                    <div class="noti-meta">Submitted by {{ n.userFullName }} • {{ n.timestamp | date:'MMM d, h:mm a' }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- USER PROFILE DROPDOWN -->
